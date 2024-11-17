@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reading Platform</title>
+    <title>PDF Viewer</title>
     <style>
         body {
             margin: 0;
@@ -56,7 +56,7 @@
 <body>
     <div class="container">
         <!-- Left Column: Markdown Content -->
-        <div class="markdown" id="markdown-container">
+        <div class="markdown">
             <h1>Markdown Content</h1>
             <p>This is where your markdown content will render.</p>
         </div>
@@ -69,57 +69,63 @@
 
     <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
     <script>
-        // PDF.js Configuration
-        const url = 'https://raw.githubusercontent.com/jinghan23/Awesome-Orator/main/files/white.pdf'; // Replace with the path to your PDF
+        document.addEventListener('DOMContentLoaded', () => {
+            // PDF.js Configuration
+            const url = 'https://raw.githubusercontent.com/jinghan23/Awesome-Orator/main/files/white.pdf';
 
-        const pdfjsLib = window['pdfjs-dist/build/pdf'];
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://mozilla.github.io/pdf.js/build/pdf.worker.js';
+            const pdfjsLib = window['pdfjs-dist/build/pdf'];
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://mozilla.github.io/pdf.js/build/pdf.worker.js';
 
-        const pdfContainer = document.getElementById('pdf-container');
-        const pdfCanvas = document.getElementById('pdf-canvas');
-        const pdfContext = pdfCanvas.getContext('2d');
+            const pdfCanvas = document.getElementById('pdf-canvas');
+            const pdfContext = pdfCanvas.getContext('2d');
 
-        let pdfDoc = null, pageNum = 1, pageRendering = false, pageNumPending = null;
+            let pdfDoc = null, pageNum = 1, pageRendering = false, pageNumPending = null;
 
-        // Render Page
-        function renderPage(num) {
-            pageRendering = true;
-            pdfDoc.getPage(num).then((page) => {
-                const viewport = page.getViewport({ scale: 1 });
-                pdfCanvas.height = viewport.height;
-                pdfCanvas.width = viewport.width;
+            function renderPage(num) {
+                console.log(`Rendering page ${num}...`);
+                pageRendering = true;
+                pdfDoc.getPage(num).then((page) => {
+                    console.log(`Page ${num} rendered.`);
+                    const viewport = page.getViewport({ scale: 1 });
+                    pdfCanvas.height = viewport.height;
+                    pdfCanvas.width = viewport.width;
 
-                const renderContext = {
-                    canvasContext: pdfContext,
-                    viewport: viewport
-                };
-                const renderTask = page.render(renderContext);
+                    const renderContext = {
+                        canvasContext: pdfContext,
+                        viewport: viewport
+                    };
+                    const renderTask = page.render(renderContext);
 
-                renderTask.promise.then(() => {
-                    pageRendering = false;
-                    if (pageNumPending !== null) {
-                        renderPage(pageNumPending);
-                        pageNumPending = null;
-                    }
+                    renderTask.promise.then(() => {
+                        console.log(`Page ${num} finished rendering.`);
+                        pageRendering = false;
+                        if (pageNumPending !== null) {
+                            renderPage(pageNumPending);
+                            pageNumPending = null;
+                        }
+                    });
                 });
-            });
-        }
-
-        // Load PDF
-        pdfjsLib.getDocument(url).promise.then((doc) => {
-            pdfDoc = doc;
-            renderPage(pageNum);
-        });
-
-        // Next/Previous Page
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowRight' && pageNum < pdfDoc.numPages) {
-                pageNum++;
-                renderPage(pageNum);
-            } else if (e.key === 'ArrowLeft' && pageNum > 1) {
-                pageNum--;
-                renderPage(pageNum);
             }
+
+            // Load PDF
+            pdfjsLib.getDocument(url).promise.then((doc) => {
+                console.log(`PDF loaded successfully! Total pages: ${doc.numPages}`);
+                pdfDoc = doc;
+                renderPage(pageNum);
+            }).catch((error) => {
+                console.error('Error loading PDF:', error);
+            });
+
+            // Next/Previous Page
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' && pageNum < pdfDoc.numPages) {
+                    pageNum++;
+                    renderPage(pageNum);
+                } else if (e.key === 'ArrowLeft' && pageNum > 1) {
+                    pageNum--;
+                    renderPage(pageNum);
+                }
+            });
         });
     </script>
 </body>
