@@ -67,17 +67,14 @@
         </div>
     </div>
 
-    <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.15.349/pdf.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // PDF.js Configuration
-            fetch('https://cors-anywhere.herokuapp.com/')
-                .then(() => console.log('CORS proxy initialized'))
-                .catch((error) => console.error('CORS proxy initialization failed', error));
-            const url = `https://cors-anywhere.herokuapp.com/https://raw.githubusercontent.com/jinghan23/Awesome-Orator/main/files/white.pdf`;
+            const url = `../files/white.pdf`;
 
             const pdfjsLib = window['pdfjs-dist/build/pdf'];
-            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://mozilla.github.io/pdf.js/build/pdf.worker.js';
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.15.349/pdf.worker.min.js';
 
             const pdfCanvas = document.getElementById('pdf-canvas');
             const pdfContext = pdfCanvas.getContext('2d');
