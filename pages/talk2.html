@@ -71,6 +71,9 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // PDF.js Configuration
+            fetch('https://cors-anywhere.herokuapp.com/')
+                .then(() => console.log('CORS proxy initialized'))
+                .catch((error) => console.error('CORS proxy initialization failed', error));
             const url = `https://cors-anywhere.herokuapp.com/https://raw.githubusercontent.com/jinghan23/Awesome-Orator/main/files/white.pdf`;
 
             const pdfjsLib = window['pdfjs-dist/build/pdf'];
