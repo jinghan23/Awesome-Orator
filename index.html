@@ -1,10 +1,63 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Subpage</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interesting Talks</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 1em;
+        }
+        .talk-block {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 1em;
+            padding: 1em;
+            transition: box-shadow 0.3s ease;
+        }
+        .talk-block:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        .talk-title {
+            font-size: 1.5em;
+            margin: 0;
+        }
+        .talk-summary {
+            margin: 0.5em 0 0;
+        }
+        @media (max-width: 600px) {
+            .talk-title {
+                font-size: 1.2em;
+            }
+            .talk-summary {
+                font-size: 0.9em;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome to My Subpage</h1>
-    <p>This is the content of the subpage.</p>
+    <div class="container">
+        <h1>Interesting Talks</h1>
+        <div class="talk-block">
+            <a href="talk1.html">
+                <h2 class="talk-title">Talk Title 1</h2>
+                <p class="talk-summary">A brief summary of Talk 1.</p>
+            </a>
+        </div>
+        <div class="talk-block">
+            <a href="talk2.html">
+                <h2 class="talk-title">Talk Title 2</h2>
+                <p class="talk-summary">A brief summary of Talk 2.</p>
+            </a>
+        </div>
+        <!-- Add more blocks as needed -->
+    </div>
 </body>
 </html>
