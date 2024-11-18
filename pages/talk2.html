@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Viewer</title>
+    <title>PDF Viewer with Swipe and Buttons</title>
     <style>
         body {
             margin: 0;
@@ -51,6 +51,45 @@
                 height: 50vh;
             }
         }
+
+        /* Page Controls */
+        .page-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .page-controls button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .page-controls button:active {
+            background-color: #0056b3;
+        }
+
+        /* Page Indicator */
+        #page-indicator {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
@@ -67,27 +106,41 @@
         </div>
     </div>
 
+    <!-- Page Controls -->
+    <div class="page-controls">
+        <button id="prev-page">Previous</button>
+        <button id="next-page">Next</button>
+    </div>
+
+    <!-- Page Indicator -->
+    <div id="page-indicator">Page 1</div>
+
+    <!-- Include Hammer.js for swipe gestures -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+
+    <!-- Include PDF.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.15.349/pdf.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // PDF.js Configuration
-            const url = `../files/Small_Talk.pdf`;
-
-            const pdfjsLib = window['pdfjs-dist/build/pdf'];
             pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.15.349/pdf.worker.min.js';
+
+            const url = 'https://raw.githubusercontent.com/jinghan23/Awesome-Orator/main/files/white.pdf';
 
             const pdfCanvas = document.getElementById('pdf-canvas');
             const pdfContext = pdfCanvas.getContext('2d');
+            const pdfContainer = document.getElementById('pdf-container');
+            const pageIndicator = document.getElementById('page-indicator');
 
             let pdfDoc = null, pageNum = 1, pageRendering = false, pageNumPending = null;
 
             function renderPage(num) {
-                console.log(`Rendering page ${num}...`);
                 pageRendering = true;
+                pageIndicator.textContent = `Page ${num}`;
                 pdfDoc.getPage(num).then((page) => {
-                    console.log(`Page ${num} rendered.`);
                     const scale = window.devicePixelRatio || 1.5; // Adjust based on screen DPI
                     const viewport = page.getViewport({ scale: scale });
+
+                    // Adjust canvas dimensions
                     pdfCanvas.height = viewport.height;
                     pdfCanvas.width = viewport.width;
 
@@ -98,7 +151,6 @@
                     const renderTask = page.render(renderContext);
 
                     renderTask.promise.then(() => {
-                        console.log(`Page ${num} finished rendering.`);
                         pageRendering = false;
                         if (pageNumPending !== null) {
                             renderPage(pageNumPending);
@@ -108,7 +160,6 @@
                 });
             }
 
-            // Load PDF
             pdfjsLib.getDocument(url).promise.then((doc) => {
                 console.log(`PDF loaded successfully! Total pages: ${doc.numPages}`);
                 pdfDoc = doc;
@@ -117,12 +168,33 @@
                 console.error('Error loading PDF:', error);
             });
 
-            // Next/Previous Page
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'ArrowRight' && pageNum < pdfDoc.numPages) {
+            // Button Controls
+            document.getElementById('prev-page').addEventListener('click', () => {
+                if (pageNum > 1) {
+                    pageNum--;
+                    renderPage(pageNum);
+                }
+            });
+
+            document.getElementById('next-page').addEventListener('click', () => {
+                if (pageNum < pdfDoc.numPages) {
                     pageNum++;
                     renderPage(pageNum);
-                } else if (e.key === 'ArrowLeft' && pageNum > 1) {
+                }
+            });
+
+            // Swipe Controls with Hammer.js
+            const hammer = new Hammer(pdfContainer);
+
+            hammer.on('swipeleft', () => {
+                if (pageNum < pdfDoc.numPages) {
+                    pageNum++;
+                    renderPage(pageNum);
+                }
+            });
+
+            hammer.on('swiperight', () => {
+                if (pageNum > 1) {
                     pageNum--;
                     renderPage(pageNum);
                 }
