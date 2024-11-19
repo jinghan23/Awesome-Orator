@@ -40,24 +40,203 @@
                 font-size: 0.9em;
             }
         }
+        .create-buttons {
+            margin: 20px 0;
+        }
+        .create-btn {
+            padding: 10px 20px;
+            margin-right: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .create-btn:hover {
+            background-color: #45a049;
+        }
+        .context-menu {
+            position: fixed;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        .menu-item {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+        .menu-item:hover {
+            background-color: #f5f5f5;
+        }
+        .delete-item {
+            color: #ff4444;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Interesting Talks</h1>
-        <div class="talk-block">
-            <a href="pages/talk1.html">
-                <h2 class="talk-title">Talk Title 1</h2>
-                <p class="talk-summary">A brief summary of Talk 1.</p>
-            </a>
+        <h1>Research Group Discussion</h1>
+        
+        <!-- Add creation buttons -->
+        <div class="create-buttons">
+            <button onclick="createNewPage('talk')" class="create-btn">New Talk Page</button>
+            <button onclick="createNewPage('reading')" class="create-btn">New Reading Page</button>
         </div>
-        <div class="talk-block">
-            <a href="pages/talk2.html">
-                <h2 class="talk-title">Talk Title 2</h2>
-                <p class="talk-summary">A brief summary of Talk 2.</p>
-            </a>
+
+        <!-- Existing content list -->
+        <div class="content-list" id="pageList">
+            <!-- Pages will be loaded here dynamically -->
         </div>
-        <!-- Add more blocks as needed -->
     </div>
+    <script>
+        let longPressTimer;
+        let activeBlock = null;
+
+        function showContextMenu(x, y, pageUrl) {
+            // Remove existing menu if any
+            removeContextMenu();
+            
+            const menu = document.createElement('div');
+            menu.className = 'context-menu';
+            menu.innerHTML = `
+                <div class="menu-item delete-item">Delete</div>
+            `;
+            
+            menu.style.left = `${x}px`;
+            menu.style.top = `${y}px`;
+            
+            document.body.appendChild(menu);
+            
+            menu.querySelector('.delete-item').addEventListener('click', () => {
+                deletePage(pageUrl);
+            });
+        }
+
+        function removeContextMenu() {
+            const existingMenu = document.querySelector('.context-menu');
+            if (existingMenu) {
+                existingMenu.remove();
+            }
+        }
+
+        async function deletePage(pageUrl) {
+            const filename = pageUrl.split('/').pop();
+            const password = prompt("Enter admin password to delete:");
+            if (!password) return;
+
+            try {
+                const response = await fetch('/delete_page', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': password
+                    },
+                    body: JSON.stringify({ filename })
+                });
+
+                if (response.ok) {
+                    await loadPages();
+                    alert('Page deleted successfully!');
+                } else {
+                    alert('Failed to delete page. Please check your password.');
+                }
+            } catch (error) {
+                alert('Error deleting page: ' + error);
+            }
+        }
+
+        // Modify your loadPages function to add event listeners
+        function addBlockEventListeners(block, pageUrl) {
+            // Long press for mobile
+            block.addEventListener('touchstart', (e) => {
+                longPressTimer = setTimeout(() => {
+                    const touch = e.touches[0];
+                    showContextMenu(touch.clientX, touch.clientY, pageUrl);
+                }, 500);
+            });
+
+            block.addEventListener('touchend', () => {
+                clearTimeout(longPressTimer);
+            });
+
+            block.addEventListener('touchmove', () => {
+                clearTimeout(longPressTimer);
+            });
+
+            // Right click for desktop
+            block.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                showContextMenu(e.clientX, e.clientY, pageUrl);
+            });
+        }
+
+        async function loadPages() {
+            try {
+                const response = await fetch('/get_pages');
+                const data = await response.json();
+                
+                const pageList = document.getElementById('pageList');
+                pageList.innerHTML = ''; // Clear existing list
+                
+                data.pages.forEach(page => {
+                    const block = document.createElement('div');
+                    block.className = 'talk-block';
+                    
+                    block.innerHTML = `
+                        <a href="${page.url}">
+                            <h2 class="talk-title">${page.title}</h2>
+                            <p class="talk-summary">Click to view details</p>
+                        </a>
+                    `;
+                    
+                    addBlockEventListeners(block, page.url);
+                    pageList.appendChild(block);
+                });
+            } catch (error) {
+                console.error('Error loading pages:', error);
+            }
+        }
+
+        // Update createNewPage function to reload pages after creation
+        async function createNewPage(type) {
+            const title = prompt(`Enter ${type} title:`);
+            if (!title) return;
+
+            const password = prompt("Enter admin password:");
+            if (!password) return;
+
+            try {
+                const response = await fetch('/create_page', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': password
+                    },
+                    body: JSON.stringify({ type, title })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    await loadPages(); // Reload the page list
+                    alert('Page created successfully!');
+                } else {
+                    alert('Failed to create page. Please check your password.');
+                }
+            } catch (error) {
+                alert('Error creating page: ' + error);
+            }
+        }
+
+        // Load pages when the page loads
+        document.addEventListener('DOMContentLoaded', loadPages);
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.context-menu')) {
+                removeContextMenu();
+            }
+        });
+    </script>
 </body>
 </html>
