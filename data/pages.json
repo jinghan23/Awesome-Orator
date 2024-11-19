@@ -1,0 +1,18 @@
+{
+    "pages": [
+        {
+            "title": "Talk2",
+            "type": "reading",
+            "url": "pages/talk2.html",
+            "created": 1731997384.9858377,
+            "pdfUrl": "https://raw.githubusercontent.com/jinghan23/Awesome-Orator/main/files/Small_Talk.pdf"
+        },
+        {
+            "title": "Talk1",
+            "type": "reading",
+            "url": "pages/talk1.html",
+            "created": 1731997384.9857082,
+            "pdfUrl": "#"
+        }
+    ]
+}

@@ -174,11 +174,14 @@
 
         async function loadPages() {
             try {
-                const response = await fetch('/get_pages');
+                const response = await fetch('data/pages.json');
                 const data = await response.json();
                 
                 const pageList = document.getElementById('pageList');
-                pageList.innerHTML = ''; // Clear existing list
+                pageList.innerHTML = '';
+                
+                // Sort pages by creation time
+                data.pages.sort((a, b) => b.created - a.created);
                 
                 data.pages.forEach(page => {
                     const block = document.createElement('div');
@@ -187,15 +190,16 @@
                     block.innerHTML = `
                         <a href="${page.url}">
                             <h2 class="talk-title">${page.title}</h2>
-                            <p class="talk-summary">Click to view details</p>
+                            <p class="talk-summary">${page.type === 'talk' ? 'View Talk Details' : 'View Reading Details'}</p>
                         </a>
                     `;
-                    
-                    addBlockEventListeners(block, page.url);
                     pageList.appendChild(block);
                 });
             } catch (error) {
                 console.error('Error loading pages:', error);
+                // Show error message on page
+                const pageList = document.getElementById('pageList');
+                pageList.innerHTML = '<p>Error loading pages. Please check if data/pages.json exists.</p>';
             }
         }
 

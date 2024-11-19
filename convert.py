@@ -5,32 +5,48 @@ from datetime import datetime
 
 def backend_to_static():
     """Convert backend version to static version"""
-    # Create data directory if it doesn't exist
     os.makedirs('data', exist_ok=True)
     
-    # Generate pages.json from existing pages
     pages = []
     for filename in os.listdir('pages'):
         if filename.endswith('.html'):
-            with open(f'pages/{filename}', 'r') as f:
+            file_path = os.path.join('pages', filename)
+            with open(file_path, 'r') as f:
                 content = f.read()
-                title = content.split('<title>')[1].split('</title>')[0]
+                
+                # Extract title from filename
+                title = filename.replace('.html', '').replace('-', ' ').title()
+                
+                # Determine page type
                 page_type = 'talk' if 'TALK_LINK' in content else 'reading'
                 
                 page_data = {
                     'title': title,
                     'type': page_type,
                     'url': f'pages/{filename}',
-                    'created': os.path.getctime(f'pages/{filename}')
+                    'created': os.path.getctime(file_path)
                 }
                 
-                # Extract specific links
                 if page_type == 'talk':
-                    talk_link = content.split('href="')[2].split('"')[0]
-                    page_data['talkLink'] = talk_link
+                    # Handle talk link
+                    try:
+                        talk_link = content.split('href="')[2].split('"')[0]
+                        if talk_link != '[TALK_LINK]':
+                            page_data['talkLink'] = talk_link
+                        else:
+                            page_data['talkLink'] = '#'
+                    except IndexError:
+                        page_data['talkLink'] = '#'
                 else:
-                    pdf_url = content.split("const url = '")[1].split("'")[0]
-                    page_data['pdfUrl'] = pdf_url
+                    # Handle PDF URL
+                    try:
+                        pdf_url = content.split("const url = '")[1].split("'")[0]
+                        if pdf_url != '[PDF_URL]':
+                            page_data['pdfUrl'] = pdf_url
+                        else:
+                            page_data['pdfUrl'] = '#'
+                    except IndexError:
+                        page_data['pdfUrl'] = '#'
                 
                 pages.append(page_data)
     
