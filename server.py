@@ -23,6 +23,10 @@ def root():
 def serve_pages(filename):
     return send_from_directory('pages', filename)
 
+@app.route('/favicon_io/<path:filename>')
+def serve_favicon(filename):
+    return send_from_directory('favicon_io', filename)
+
 @app.route('/<path:path>')
 def serve_static(path):
     return send_from_directory('.', path)
@@ -87,6 +91,10 @@ def delete_page():
         return {'success': True}
     except Exception as e:
         return {'error': str(e)}, 500
+
+@app.route('/files/audio/<path:filename>')
+def serve_audio(filename):
+    return send_from_directory('files/audio', filename)
 
 if __name__ == '__main__':
     app.run(debug=True) 
