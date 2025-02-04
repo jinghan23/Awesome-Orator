@@ -89,8 +89,12 @@
             try {
                 // Extract the numeric part from filename (e.g., "0.txt" -> "0")
                 const chapterNum = chapterFile.split('.')[0];
+                console.log(`Loading chapter: ${chapterFile}`);
                 
                 const response = await fetch(baseFilePath + chapterFile);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 const text = await response.text();
                 const lines = text.split('\n');
                 const title = lines[0];
@@ -98,28 +102,37 @@
                 
                 document.getElementById('chapter-content').textContent = content;
                 
-                // Update audio player with numeric filename
-                const audioFile = chapterNum + '.mp3';
+                // Always use 0.mp3 for now
                 const audioPlayer = document.getElementById('audio-player');
-                audioPlayer.src = baseFilePath + audioFile;
+                audioPlayer.src = baseFilePath + '0.mp3';
                 audioPlayer.load();
+                console.log('Audio loaded successfully');
             } catch (error) {
-                console.error('Error loading chapter:', error);
-                document.getElementById('chapter-content').textContent = 'Error loading chapter content.';
+                console.error('Detailed error loading chapter:', error);
+                document.getElementById('chapter-content').textContent = `Error loading chapter content: ${error.message}`;
             }
         }
 
         // Load chapter list
         async function loadChapterList() {
             try {
+                console.log('Attempting to load chapter list...');
                 const response = await fetch('/api/chapters/305.OY.25.001');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const data = await response.json();
+                console.log('Received chapter data:', data);
                 
                 if (data.error) {
                     throw new Error(data.error);
                 }
                 
-                const chapters = data.chapters;  // Get chapters array from response
+                const chapters = data.chapters;
+                if (!chapters || !Array.isArray(chapters)) {
+                    throw new Error('Invalid chapters data received');
+                }
                 
                 // Sort chapters numerically
                 chapters.sort((a, b) => {
@@ -129,6 +142,13 @@
                 });
                 
                 const chapterList = document.getElementById('chapters');
+                chapterList.innerHTML = ''; // Clear existing content
+                
+                if (chapters.length === 0) {
+                    chapterList.innerHTML = 'No chapters found.';
+                    return;
+                }
+                
                 chapters.forEach(chapter => {
                     const div = document.createElement('div');
                     div.className = 'chapter-item';
@@ -136,10 +156,12 @@
                     div.onclick = () => loadChapter(chapter.file);
                     chapterList.appendChild(div);
                 });
+                
+                console.log(`Loaded ${chapters.length} chapters successfully`);
             } catch (error) {
-                console.error('Error loading chapter list:', error);
+                console.error('Detailed error loading chapter list:', error);
                 document.getElementById('chapters').innerHTML = 
-                    `Error loading chapters: ${error.message}. Please ensure the files directory exists at /files/305.OY.25.001/ with .txt files.`;
+                    `Error loading chapters: ${error.message}. Please check the server logs for more details.`;
             }
         }
 

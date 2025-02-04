@@ -93,13 +93,20 @@ def get_chapters(book_id):
     book_path = os.path.join('files', book_id)
     chapters = []
     
+    print(f"Attempting to load chapters from: {book_path}")  # Debug log
+    
     if not os.path.exists(book_path):
         print(f"Book path not found: {book_path}")  # Debug log
-        return {'error': 'Book not found'}, 404
+        return {'error': f'Book directory not found: {book_path}'}, 404
         
     try:
         # Get all txt files and sort them numerically
         files = [f for f in os.listdir(book_path) if f.endswith('.txt')]
+        print(f"Found {len(files)} text files: {files}")  # Debug log
+        
+        if not files:
+            return {'error': 'No .txt files found in book directory'}, 404
+            
         files.sort(key=lambda x: int(x.split('.')[0]))  # Sort by numeric prefix
         
         for filename in files:
@@ -111,15 +118,17 @@ def get_chapters(book_id):
                         'title': first_line or f"Chapter {filename.split('.')[0]}",  # Fallback title if empty
                         'file': filename
                     })
+                print(f"Successfully loaded chapter from {filename}")  # Debug log
             except Exception as e:
                 print(f"Error reading file {filename}: {str(e)}")  # Debug log
                 continue
         
         if not chapters:
             print("No chapters found")  # Debug log
-            return {'error': 'No chapters found'}, 404
+            return {'error': 'No valid chapters found'}, 404
             
-        return {'chapters': chapters}  # Return in expected format
+        print(f"Successfully loaded {len(chapters)} chapters")  # Debug log
+        return {'chapters': chapters}
         
     except Exception as e:
         print(f"Error processing chapters: {str(e)}")  # Debug log
