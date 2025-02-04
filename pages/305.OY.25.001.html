@@ -12,37 +12,25 @@
             max-width: 1200px;
             margin: 0 auto;
         }
-        .container {
-            display: flex;
-            gap: 20px;
-        }
-        .text-content {
-            flex: 1;
-            padding: 20px;
-            background: #f5f5f5;
-            border-radius: 8px;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
         .chapter-list {
-            width: 300px;
             padding: 20px;
             background: #fff;
-            border-right: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .chapter-item {
             margin-bottom: 15px;
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            cursor: pointer;
         }
         .chapter-item:hover {
             background: #f0f0f0;
         }
-        .audio-player {
-            width: 100%;
-            margin-top: 10px;
+        .chapter-item a {
+            text-decoration: none;
+            color: #333;
+            display: block;
         }
         .back-link {
             display: block;
@@ -50,125 +38,31 @@
             color: #007bff;
             text-decoration: none;
         }
-        .back-link:hover {
-            text-decoration: underline;
-        }
-        h1 {
-            color: #333;
-            margin-bottom: 30px;
-        }
-        #chapter-content {
-            white-space: pre-wrap;
-            line-height: 1.6;
-        }
     </style>
 </head>
 <body>
     <a href="../index.html" class="back-link">← Back to main page</a>
     <h1>女性与社会权力系统</h1>
     
-    <div class="container">
-        <div class="chapter-list" id="chapters">
-            <!-- Chapters will be loaded here dynamically -->
-        </div>
-        
-        <div class="text-content">
-            <audio id="audio-player" class="audio-player" controls>
-                Your browser does not support the audio element.
-            </audio>
-            <div id="chapter-content">
-                Select a chapter to begin reading...
-            </div>
-        </div>
+    <div class="chapter-list">
+        <div class="chapter-item"><a href="305.OY.25.001/chapter_0.html">Chapter 0: 引言</a></div>
+<div class="chapter-item"><a href="305.OY.25.001/chapter_1.html">Chapter 1: 第一章 被遗忘了的远古母系文化</a></div>
+<div class="chapter-item"><a href="305.OY.25.001/chapter_2.html">Chapter 2: 第二章 对女性身心的弱化处理</a></div>
+<div class="chapter-item"><a href="305.OY.25.001/chapter_3.html">Chapter 3: 第三章 男权的判断： “女人是劣等 性别”</a></div>
+<div class="chapter-item"><a href="305.OY.25.001/chapter_4.html">Chapter 4: 第四章 对女性形象的丑化</a></div>
+<div class="chapter-item"><a href="305.OY.25.001/chapter_5.html">Chapter 5: 第五章 牺牲女性</a></div>
+<div class="chapter-item"><a href="305.OY.25.001/chapter_6.html">Chapter 6: 第六章 不承认自己是 “女性”的女性统治者</a></div>
+<div class="chapter-item"><a href="305.OY.25.001/chapter_7.html">Chapter 7: 第七章 不仅仅是女性的悲剧</a></div>
+<div class="chapter-item"><a href="305.OY.25.001/chapter_8.html">Chapter 8: 第八章 走近社会权力系统</a></div>
+<div class="chapter-item"><a href="305.OY.25.001/chapter_9.html">Chapter 9: 第九章 争取教育平等权</a></div>
+<div class="chapter-item"><a href="305.OY.25.001/chapter_10.html">Chapter 10: 第十章 一场静悄悄的人格革命</a></div>
+<div class="chapter-item"><a href="305.OY.25.001/chapter_11.html">Chapter 11: 第十一章 从社会边缘人到社会主人</a></div>
+<div class="chapter-item"><a href="305.OY.25.001/chapter_12.html">Chapter 12: 第十二章 怎样化解双重道德标准</a></div>
+<div class="chapter-item"><a href="305.OY.25.001/chapter_13.html">Chapter 13: 第十三章 世界妇女参政的脚步</a></div>
+<div class="chapter-item"><a href="305.OY.25.001/chapter_14.html">Chapter 14: 第十四章 妇女参政的 “隐形”参政现象</a></div>
+<div class="chapter-item"><a href="305.OY.25.001/chapter_15.html">Chapter 15: 第十五章 参政女性心态透视</a></div>
+<div class="chapter-item"><a href="305.OY.25.001/chapter_16.html">Chapter 16: 第十六章 实现女性 “人”的解放</a></div>
+
     </div>
-
-    <script>
-        const baseFilePath = '/files/305.OY.25.001/';
-        
-        async function loadChapter(chapterFile) {
-            try {
-                // Extract the numeric part from filename (e.g., "0.txt" -> "0")
-                const chapterNum = chapterFile.split('.')[0];
-                console.log(`Loading chapter: ${chapterFile}`);
-                
-                const response = await fetch(baseFilePath + chapterFile);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const text = await response.text();
-                const lines = text.split('\n');
-                const title = lines[0];
-                const content = lines.slice(1).join('\n');
-                
-                // Format the content by replacing spaces with newlines
-                const formattedContent = content.replace(/ /g, '\n');
-                document.getElementById('chapter-content').textContent = formattedContent;
-                
-                // Always use 0.mp3 for now
-                const audioPlayer = document.getElementById('audio-player');
-                audioPlayer.src = baseFilePath + '0.mp3';
-                audioPlayer.load();
-                console.log('Audio loaded successfully');
-            } catch (error) {
-                console.error('Detailed error loading chapter:', error);
-                document.getElementById('chapter-content').textContent = `Error loading chapter content: ${error.message}`;
-            }
-        }
-
-        // Load chapter list
-        async function loadChapterList() {
-            try {
-                console.log('Attempting to load chapter list...');
-                const response = await fetch('/api/chapters/305.OY.25.001');
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                console.log('Received chapter data:', data);
-                
-                if (data.error) {
-                    throw new Error(data.error);
-                }
-                
-                const chapters = data.chapters;
-                if (!chapters || !Array.isArray(chapters)) {
-                    throw new Error('Invalid chapters data received');
-                }
-                
-                // Sort chapters numerically
-                chapters.sort((a, b) => {
-                    const numA = parseInt(a.file.split('.')[0]);
-                    const numB = parseInt(b.file.split('.')[0]);
-                    return numA - numB;
-                });
-                
-                const chapterList = document.getElementById('chapters');
-                chapterList.innerHTML = ''; // Clear existing content
-                
-                if (chapters.length === 0) {
-                    chapterList.innerHTML = 'No chapters found.';
-                    return;
-                }
-                
-                chapters.forEach(chapter => {
-                    const div = document.createElement('div');
-                    div.className = 'chapter-item';
-                    div.textContent = `Chapter ${chapter.file.split('.')[0]}: ${chapter.title}`;
-                    div.onclick = () => loadChapter(chapter.file);
-                    chapterList.appendChild(div);
-                });
-                
-                console.log(`Loaded ${chapters.length} chapters successfully`);
-            } catch (error) {
-                console.error('Detailed error loading chapter list:', error);
-                document.getElementById('chapters').innerHTML = 
-                    `Error loading chapters: ${error.message}. Please check the server logs for more details.`;
-            }
-        }
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', loadChapterList);
-    </script>
 </body>
 </html> 

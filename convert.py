@@ -57,7 +57,60 @@ def backend_to_static():
     with open('data/pages.json', 'w') as f:
         json.dump({'pages': pages}, f, indent=4)
     
+    # Generate static chapter pages
+    books_path = 'files'
+    for book_id in os.listdir(books_path):
+        book_path = os.path.join(books_path, book_id)
+        if os.path.isdir(book_path):
+            # Create book pages directory
+            book_pages_dir = os.path.join('pages', book_id)
+            os.makedirs(book_pages_dir, exist_ok=True)
+            
+            # Get all chapters
+            txt_files = [f for f in os.listdir(book_path) if f.endswith('.txt')]
+            txt_files.sort(key=lambda x: int(x.split('.')[0]))
+            
+            # Generate chapter list HTML
+            chapters_html = ''
+            for i, filename in enumerate(txt_files):
+                chapter_num = filename.split('.')[0]
+                with open(os.path.join(book_path, filename), 'r', encoding='utf-8') as f:
+                    title = f.readline().strip()
+                chapters_html += f'<div class="chapter-item"><a href="{book_id}/chapter_{chapter_num}.html">Chapter {i}: {title}</a></div>\n'
+            
+            # Generate index page for the book
+            with open(os.path.join('templates', 'book_template.html'), 'r', encoding='utf-8') as f:
+                book_template = f.read()
+            
+            book_html = book_template.replace('[CHAPTERS]', chapters_html)
+            with open(os.path.join('pages', f'{book_id}.html'), 'w', encoding='utf-8') as f:
+                f.write(book_html)
+            
+            # Generate individual chapter pages
+            for filename in txt_files:
+                chapter_num = filename.split('.')[0]
+                with open(os.path.join(book_path, filename), 'r', encoding='utf-8') as f:
+                    content = f.read()
+                    lines = content.split('\n')
+                    title = lines[0]
+                    # Format the content by replacing spaces with newlines
+                    text = '\n'.join(lines[1:]).replace(' ', '\n')
+                
+                with open(os.path.join('templates', 'chapter_template.html'), 'r', encoding='utf-8') as f:
+                    chapter_template = f.read()
+                
+                chapter_html = chapter_template\
+                    .replace('[TITLE]', title)\
+                    .replace('[CONTENT]', text)\
+                    .replace('[BOOK_ID]', book_id)\
+                    .replace('[AUDIO_URL]', f'../../files/{book_id}/{chapter_num}.mp3')  # Fix audio path
+                
+                output_path = os.path.join(book_pages_dir, f'chapter_{chapter_num}.html')
+                with open(output_path, 'w', encoding='utf-8') as f:
+                    f.write(chapter_html)
+
     print("✓ Generated pages.json")
+    print("✓ Generated static chapter pages")
     print("✓ Static version ready")
 
 def static_to_backend():
