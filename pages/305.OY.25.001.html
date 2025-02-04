@@ -87,6 +87,9 @@
         
         async function loadChapter(chapterFile) {
             try {
+                // Extract the numeric part from filename (e.g., "0.txt" -> "0")
+                const chapterNum = chapterFile.split('.')[0];
+                
                 const response = await fetch(baseFilePath + chapterFile);
                 const text = await response.text();
                 const lines = text.split('\n');
@@ -95,8 +98,8 @@
                 
                 document.getElementById('chapter-content').textContent = content;
                 
-                // Update audio player
-                const audioFile = chapterFile.replace('.txt', '.mp3');
+                // Update audio player with numeric filename
+                const audioFile = chapterNum + '.mp3';
                 const audioPlayer = document.getElementById('audio-player');
                 audioPlayer.src = baseFilePath + audioFile;
                 audioPlayer.load();
@@ -111,6 +114,13 @@
             try {
                 const response = await fetch('/api/chapters/305.OY.25.001');
                 const chapters = await response.json();
+                
+                // Sort chapters numerically
+                chapters.sort((a, b) => {
+                    const numA = parseInt(a.file.split('.')[0]);
+                    const numB = parseInt(b.file.split('.')[0]);
+                    return numA - numB;
+                });
                 
                 const chapterList = document.getElementById('chapters');
                 chapters.forEach(chapter => {
