@@ -113,7 +113,13 @@
         async function loadChapterList() {
             try {
                 const response = await fetch('/api/chapters/305.OY.25.001');
-                const chapters = await response.json();
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                const chapters = data.chapters;  // Get chapters array from response
                 
                 // Sort chapters numerically
                 chapters.sort((a, b) => {
@@ -126,13 +132,14 @@
                 chapters.forEach(chapter => {
                     const div = document.createElement('div');
                     div.className = 'chapter-item';
-                    div.textContent = chapter.title;
+                    div.textContent = `Chapter ${chapter.file.split('.')[0]}: ${chapter.title}`;
                     div.onclick = () => loadChapter(chapter.file);
                     chapterList.appendChild(div);
                 });
             } catch (error) {
                 console.error('Error loading chapter list:', error);
-                document.getElementById('chapters').innerHTML = 'Error loading chapters.';
+                document.getElementById('chapters').innerHTML = 
+                    `Error loading chapters: ${error.message}. Please ensure the files directory exists at /files/305.OY.25.001/ with .txt files.`;
             }
         }
 

@@ -94,19 +94,36 @@ def get_chapters(book_id):
     chapters = []
     
     if not os.path.exists(book_path):
+        print(f"Book path not found: {book_path}")  # Debug log
         return {'error': 'Book not found'}, 404
         
-    for filename in sorted(os.listdir(book_path)):
-        if filename.endswith('.txt'):
+    try:
+        # Get all txt files and sort them numerically
+        files = [f for f in os.listdir(book_path) if f.endswith('.txt')]
+        files.sort(key=lambda x: int(x.split('.')[0]))  # Sort by numeric prefix
+        
+        for filename in files:
             file_path = os.path.join(book_path, filename)
-            with open(file_path, 'r', encoding='utf-8') as f:
-                first_line = f.readline().strip()
-                chapters.append({
-                    'title': first_line,
-                    'file': filename
-                })
-    
-    return chapters
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    first_line = f.readline().strip()
+                    chapters.append({
+                        'title': first_line or f"Chapter {filename.split('.')[0]}",  # Fallback title if empty
+                        'file': filename
+                    })
+            except Exception as e:
+                print(f"Error reading file {filename}: {str(e)}")  # Debug log
+                continue
+        
+        if not chapters:
+            print("No chapters found")  # Debug log
+            return {'error': 'No chapters found'}, 404
+            
+        return {'chapters': chapters}  # Return in expected format
+        
+    except Exception as e:
+        print(f"Error processing chapters: {str(e)}")  # Debug log
+        return {'error': str(e)}, 500
 
 if __name__ == '__main__':
     app.run(debug=True) 
