@@ -100,7 +100,9 @@
                 const title = lines[0];
                 const content = lines.slice(1).join('\n');
                 
-                document.getElementById('chapter-content').textContent = content;
+                // Format the content by replacing spaces with newlines
+                const formattedContent = content.replace(/ /g, '\n');
+                document.getElementById('chapter-content').textContent = formattedContent;
                 
                 // Always use 0.mp3 for now
                 const audioPlayer = document.getElementById('audio-player');

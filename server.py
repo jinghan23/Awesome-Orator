@@ -27,6 +27,10 @@ def serve_pages(filename):
 def serve_static(path):
     return send_from_directory('.', path)
 
+@app.route('/data/<path:filename>')
+def serve_data(filename):
+    return send_from_directory('data', filename)
+
 @app.route('/get_pages')
 def get_pages():
     pages = []
@@ -133,6 +137,43 @@ def get_chapters(book_id):
     except Exception as e:
         print(f"Error processing chapters: {str(e)}")  # Debug log
         return {'error': str(e)}, 500
+
+@app.route('/check_files/<book_id>')
+def check_files(book_id):
+    book_path = os.path.join('files', book_id)
+    result = {
+        'book_path_exists': os.path.exists(book_path),
+        'book_path': book_path,
+        'files': []
+    }
+    
+    if result['book_path_exists']:
+        try:
+            files = os.listdir(book_path)
+            result['files'] = files
+        except Exception as e:
+            result['error'] = str(e)
+    
+    return result
+
+@app.route('/debug/paths')
+def debug_paths():
+    return {
+        'current_dir': os.getcwd(),
+        'data_exists': os.path.exists('data'),
+        'data_files': os.listdir('data') if os.path.exists('data') else [],
+        'files_exists': os.path.exists('files'),
+        'files_contents': os.listdir('files') if os.path.exists('files') else []
+    }
+
+@app.route('/files/<path:filename>')
+def serve_files(filename):
+    print(f"Attempting to serve file: {filename}")  # Debug log
+    try:
+        return send_from_directory('files', filename)
+    except Exception as e:
+        print(f"Error serving file: {str(e)}")  # Debug log
+        return {'error': str(e)}, 404
 
 if __name__ == '__main__':
     app.run(debug=True) 
