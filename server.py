@@ -88,5 +88,25 @@ def delete_page():
     except Exception as e:
         return {'error': str(e)}, 500
 
+@app.route('/api/chapters/<book_id>')
+def get_chapters(book_id):
+    book_path = os.path.join('files', book_id)
+    chapters = []
+    
+    if not os.path.exists(book_path):
+        return {'error': 'Book not found'}, 404
+        
+    for filename in sorted(os.listdir(book_path)):
+        if filename.endswith('.txt'):
+            file_path = os.path.join(book_path, filename)
+            with open(file_path, 'r', encoding='utf-8') as f:
+                first_line = f.readline().strip()
+                chapters.append({
+                    'title': first_line,
+                    'file': filename
+                })
+    
+    return chapters
+
 if __name__ == '__main__':
     app.run(debug=True) 
